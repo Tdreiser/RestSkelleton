@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:10'
+    container_name: 'java-postgres'
+    environment:
+    - 'POSTGRES_USER=postgres'
+    - 'POSTGRES_PASSWORD=af4f2787'
+    - 'POSTGRES_DB=postgres'
+  app:
+    build: .
+    container_name: 'java-skeleton'
+    ports:
+      - "8080:8080"
