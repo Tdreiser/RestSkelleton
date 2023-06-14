@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.nordclan.RestSkelleton.entity.Client;
 import ru.nordclan.RestSkelleton.entity.Message;
 import ru.nordclan.RestSkelleton.repository.ClientRepository;
-import ru.nordclan.RestSkelleton.repository.MessageRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
-    private final MessageRepository messageRepository;
+
 
     @Override
     public void create(Client client) {
@@ -67,7 +66,13 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Message readClientMessage(Integer clientId, Integer messageId) {
-        return messageRepository.findByClientIdAndMessageId(clientId, messageId);
+        Optional<Client> client = clientRepository.findById(clientId);
+        return client.flatMap(cl -> cl
+                .getMessages()
+                .stream()
+                .filter(m -> m.getId().equals(clientId))
+                .findAny())
+                .orElse(null);
     }
 
 
