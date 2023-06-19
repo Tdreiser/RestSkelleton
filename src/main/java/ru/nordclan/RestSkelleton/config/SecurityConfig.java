@@ -23,12 +23,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/clients/**")
-                .hasAnyAuthority(Role.admin.getAuthority())
+                .antMatchers("/api/v1/clients/**")
+                .hasAnyAuthority(Role.ADMIN.getAuthority())
                 .antMatchers(  "/user/**")
-                .hasAnyAuthority(Role.admin.getAuthority())
+                .hasAnyAuthority(Role.ADMIN.getAuthority())
                 .antMatchers("/request/**")
-                .hasAnyAuthority(Role.operator.getAuthority(),Role.user.getAuthority())
+                .hasAnyAuthority(Role.OPERATOR.getAuthority(),Role.OPERATOR.getAuthority())
                 .and().httpBasic();
     }
 

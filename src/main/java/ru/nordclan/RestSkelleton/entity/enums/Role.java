@@ -12,9 +12,9 @@ import static ru.nordclan.RestSkelleton.entity.enums.Permission.*;
  * @author Shlokov Andrey
  */
 public enum Role implements GrantedAuthority {
-    admin(Set.of(USER_SHOW_ALL, USER_SET_OPERATOR)),
-    operator(Set.of(REQUEST_ACCEPT, REQUEST_DECIDE, REQUEST_SHOW_SENT_LIST)),
-    user(Set.of(REQUEST_ADD, REQUEST_SHOW_EXISTS_LIST, REQUEST_EDIT_DRAFT_LIST, REQUEST_SEND));
+    ADMIN(Set.of(USER_SHOW_ALL, USER_SET_OPERATOR)),
+    OPERATOR(Set.of(REQUEST_ACCEPT, REQUEST_DECIDE, REQUEST_SHOW_SENT_LIST)),
+    USER(Set.of(REQUEST_ADD, REQUEST_SHOW_EXISTS_LIST, REQUEST_EDIT_DRAFT_LIST, REQUEST_SEND));
     private final Set<Permission> permissions;
 
     Role(Set<Permission> permissions) {
