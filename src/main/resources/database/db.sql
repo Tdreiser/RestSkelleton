@@ -85,7 +85,4 @@ alter table ONLY public.clients drop constraint if exists fk7ncdpoo5m67gbghrq4o1
 alter table ONLY public.clients
     ADD CONSTRAINT fk7ncdpoo5m67gbghrq4o1qaaul FOREIGN KEY (car_id) REFERENCES public.cars(id);
 
-alter table ONLY public.clients drop constraint if exists message_to_client cascade;
-alter table ONLY public.clients
-    ADD CONSTRAINT message_to_client FOREIGN KEY (message_id) REFERENCES public.messages_clients(id);
 

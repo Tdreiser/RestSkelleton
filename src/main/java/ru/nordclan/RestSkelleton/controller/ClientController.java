@@ -76,7 +76,6 @@ public class ClientController {
     ResponseEntity<List<Message>> readMessages(@PathVariable(name = "id") Integer id) {
 
         consumer.subscribe(Collections.singletonList("quickstart"));
-
         ConsumerRecords<String, String> records =
                 consumer.poll(Duration.ofMillis(100));
         if (!records.isEmpty()){

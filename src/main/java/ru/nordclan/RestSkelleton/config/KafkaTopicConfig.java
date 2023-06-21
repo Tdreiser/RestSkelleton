@@ -1,10 +1,5 @@
 package ru.nordclan.RestSkelleton.config;
 
-/**
- * @author Shlokov Andrey
- */
-
-
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +9,10 @@ import org.springframework.kafka.core.KafkaAdmin;
 
 import java.util.HashMap;
 import java.util.Map;
+
+/**
+ * @author Shlokov Andrey
+ */
 
 @Configuration
 public class KafkaTopicConfig {
