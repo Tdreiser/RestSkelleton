@@ -1,5 +1,7 @@
 package ru.nordclan.RestSkelleton.controller;
 
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,8 @@ import ru.nordclan.RestSkelleton.entity.Client;
 import ru.nordclan.RestSkelleton.entity.Message;
 import ru.nordclan.RestSkelleton.service.ClientService;
 
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +21,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("api/v1/clients")
 public class ClientController {
+
     @Autowired
     private ClientService clientService;
+    @Autowired
+    private KafkaConsumer<String, String> consumer;
+
 
     @PostMapping
     ResponseEntity<HttpStatus> create(@RequestBody Client client) {
@@ -27,7 +35,7 @@ public class ClientController {
     }
 
     @GetMapping(params = "id")
-    ResponseEntity<?> readById(@RequestParam Integer id) {
+    ResponseEntity<Client> readById(@RequestParam Integer id) {
 
         final Optional<Client> client = clientService.read(id);
         return client.isPresent()
@@ -42,7 +50,10 @@ public class ClientController {
 
     @GetMapping
     ResponseEntity<List<Client>> read() {
-        return new ResponseEntity<>(clientService.read(), HttpStatus.OK);
+        List<Client> clients = clientService.read();
+        clientService.sendMessage("quickstart", "users requested = " + clients.size());
+
+        return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
@@ -63,6 +74,16 @@ public class ClientController {
 
     @GetMapping("{id}/messages")
     ResponseEntity<List<Message>> readMessages(@PathVariable(name = "id") Integer id) {
+
+        consumer.subscribe(Collections.singletonList("quickstart"));
+
+        ConsumerRecords<String, String> records =
+                consumer.poll(Duration.ofMillis(100));
+        if (!records.isEmpty()){
+            System.out.println("---------------------new messages begin---------------");
+            records.forEach(r-> System.out.println(r.value()));
+            System.out.println("---------------------new messages end-----------------");
+        }
         List<Message> messages = clientService.readClientMessages(id);
         return messages != null
                 ? new ResponseEntity<>(messages, HttpStatus.OK)

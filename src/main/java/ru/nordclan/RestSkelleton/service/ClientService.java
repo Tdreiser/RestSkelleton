@@ -19,5 +19,6 @@ public interface ClientService {
     List<Message> readClientMessages(Integer id);
     Message readClientMessage(Integer clientId, Integer messageId);
     boolean writeMessage(String text, int id);
+    void sendMessage(String topicName, String message);
 
 }

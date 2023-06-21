@@ -1,6 +1,7 @@
 package ru.nordclan.RestSkelleton.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import ru.nordclan.RestSkelleton.entity.Client;
 import ru.nordclan.RestSkelleton.entity.Message;
@@ -17,7 +18,12 @@ import java.util.Optional;
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
+    @Override
+    public void sendMessage(String topicName,String msg) {
+        kafkaTemplate.send(topicName, msg);
+    }
 
     @Override
     public void create(Client client) {
