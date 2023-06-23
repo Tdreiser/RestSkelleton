@@ -2,13 +2,16 @@ package ru.nordclan.RestSkelleton.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.nordclan.RestSkelleton.entity.enums.Role;
+import ru.nordclan.RestSkelleton.security.JwtConfigurer;
 import ru.nordclan.RestSkelleton.service.CustomUserDetailService;
 
 /**
@@ -19,24 +22,26 @@ import ru.nordclan.RestSkelleton.service.CustomUserDetailService;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomUserDetailService userDetailService;
 
+    private final JwtConfigurer jwtConfigurer;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/clients/**")
-                .hasAnyAuthority(Role.ADMIN.getAuthority())
-                .antMatchers(  "/user/**")
-                .hasAnyAuthority(Role.ADMIN.getAuthority())
-                .antMatchers("/request/**")
-                .hasAnyAuthority(Role.OPERATOR.getAuthority(),Role.OPERATOR.getAuthority())
-                .and().httpBasic();
+                .antMatchers("/").permitAll()
+                .antMatchers("/api/v1/auth/login")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .apply(jwtConfigurer);
     }
-
+    @Bean
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(userDetailService)
-                .passwordEncoder(passwordEncoder());
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     @Bean
