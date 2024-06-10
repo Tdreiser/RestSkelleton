@@ -57,7 +57,7 @@ public class JwtTokenProvider {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claimsJws.getBody().getExpiration().before(new Date());
         } catch (IllegalArgumentException | JwtException e) {
-            throw new JwtAuthenticationException("error authetication token", HttpStatus.UNAUTHORIZED);
+            throw new JwtAuthenticationException("error authentication token", HttpStatus.UNAUTHORIZED);
         }
 
     }
