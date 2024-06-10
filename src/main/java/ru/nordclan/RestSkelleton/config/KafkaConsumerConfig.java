@@ -33,10 +33,10 @@ public class KafkaConsumerConfig {
                 bootstrapAddress);
         configProps.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
+                StringDeserializer.class);
         configProps.put(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
+                StringDeserializer.class);
 
         return new DefaultKafkaConsumerFactory<>(configProps);
 
