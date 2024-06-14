@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <preConditions>
+        <dbms type="postgresql"/>
+    </preConditions>
+
+    <changeSet id="01" author="ashlokov">
+        <preConditions onFail="MARK_RAN" onFailMessage="User ashlokov already exists">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM PG_USER
+                WHERE USENAME = 'ashlokov'
+            </sqlCheck>
+        </preConditions>
+        <comment>Создание пользователя ashlokov</comment>
+        <sql>
+            CREATE
+            USER ashlokov PASSWORD 'ashlokov';
+        </sql>
+        <rollback>
+            DROP USER ashlokov;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="02" author="ashlokov" runInTransaction="false">
+        <preConditions onFail="MARK_RAN" onFailMessage="Database rest_skeleton already exists">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1)
+                FROM pg_database
+                WHERE datname = 'rest_skeleton';
+            </sqlCheck>
+        </preConditions>
+        <comment>Создание базы данных rest_skeleton</comment>
+        <sql>
+            CREATE DATABASE rest_skeleton OWNER ashlokov;
+        </sql>
+        <rollback>
+            DROP DATABASE rest_skeleton;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="03" author="ashlokov">
+        <comment>Схема rest_skeleton_sm</comment>
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS rest_skeleton_sm AUTHORIZATION ashlokov;
+            GRANT USAGE ON SCHEMA rest_skeleton_sm TO ashlokov;
+        </sql>
+        <rollback>
+            DROP SCHEMA rest_skeleton_sm;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="04" author="ashlokov">
+        <comment>Грант соединения к базе данных</comment>
+        <sql>
+            GRANT
+            CONNECT
+            ON DATABASE rest_skeleton TO ashlokov;
+        </sql>
+        <rollback>
+            REVOKE CONNECT ON DATABASE rest_skeleton FROM ashlokov;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="05" author="ashlokov">
+        <comment>Отбор public грантов на подключение к rest_skeleton</comment>
+        <sql>revoke connect on database rest_skeleton from public</sql>
+        <rollback>grant connect on database rest_skeleton to public</rollback>
+    </changeSet>
+
+</databaseChangeLog>

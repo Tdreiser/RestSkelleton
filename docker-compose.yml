@@ -1,25 +1,38 @@
 version: '3.5'
 
 services:
-  #  postgres:
-  #    image: 'postgres:10'
-  #    container_name: 'java-postgres'
-  #    environment:
-  #    - 'POSTGRES_USER=postgres'
-  #    - 'POSTGRES_PASSWORD=af4f2787'
-  #    - 'POSTGRES_DB=postgres'
+  database:
+    image: postgres:10
+    container_name: database
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "postgres"
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: pg_isready -U postgres -d postgres -p 5432
+      interval: 2s
+      timeout: 3s
+      retries: 3
+    ports:
+      - "5432:5432"
+    networks:
+      - web_net
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - web_net
+
   broker:
     image: confluentinc/cp-kafka:7.3.2
     container_name: broker
     ports:
-      # To learn about configuring Kafka for access across networks see
-      # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
       - "9092:9092"
     depends_on:
       - zookeeper
@@ -31,6 +44,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - web_net
+
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
@@ -38,6 +54,8 @@ services:
       - 8082:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: true
+    networks:
+      - web_net
 
   app:
     build: .
@@ -46,6 +64,24 @@ services:
       - "8080:8080"
     networks:
       - web_net
+
+  liquibase:
+    container_name: liquibase
+    build:
+      dockerfile: /liquibase/Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - LIQUI_CHANGELOG=master.xml
+    networks:
+      - web_net
+
 networks:
   web_net:
     driver: bridge

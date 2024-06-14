@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <preConditions>
+        <dbms type="postgresql"/>
+    </preConditions>
+
+    <changeSet id="06" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="cars" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы авто клиентов</comment>
+        <sql>
+            create TABLE IF NOT EXISTS rest_skeleton_sm.cars (
+                id integer NOT NULL,
+                mark character varying(255),
+                model character varying(255),
+                manufactureyear integer,
+                PRIMARY KEY (id)
+                );
+
+            alter table rest_skeleton_sm.cars OWNER TO ashlokov;
+
+            create sequence  IF NOT EXISTS rest_skeleton_sm.cars_id_seq
+            AS integer
+            START with 1
+            INCREMENT BY 1
+            NO MINVALUE
+            NO MAXVALUE
+            CACHE 1;
+
+            alter table rest_skeleton_sm.cars_id_seq OWNER TO ashlokov;
+
+            alter sequence rest_skeleton_sm.cars_id_seq OWNED BY rest_skeleton_sm.cars.id;
+
+            alter table ONLY rest_skeleton_sm.cars alter COLUMN id SET DEFAULT nextval('rest_skeleton_sm.cars_id_seq'::regclass);
+
+            COMMENT ON TABLE rest_skeleton_sm.cars IS 'Авто клиентов';
+            COMMENT ON COLUMN rest_skeleton_sm.cars.id IS 'Уникальный идентификатор записи';
+            COMMENT ON COLUMN rest_skeleton_sm.cars.mark IS 'Марка авто';
+            COMMENT ON COLUMN rest_skeleton_sm.cars.model IS 'Модель авто';
+            COMMENT ON COLUMN rest_skeleton_sm.cars.manufactureyear IS 'Год производства';
+        </sql>
+        <rollback>
+            <dropTable tableName="cars" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="07" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="clients" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы клиентов</comment>
+        <sql>
+            create TABLE  IF NOT EXISTS  rest_skeleton_sm.clients (
+                id integer NOT NULL,
+                email character varying(255),
+                name character varying(255),
+                phone character varying(255),
+                car_id integer,
+                message_id integer,
+                PRIMARY KEY (id),
+                FOREIGN KEY (car_id) REFERENCES rest_skeleton_sm.cars(id)
+                );
+            alter table rest_skeleton_sm.clients OWNER TO ashlokov;
+
+            create sequence  IF NOT EXISTS  rest_skeleton_sm.clients_id_seq
+            AS integer
+            START with 1
+            INCREMENT BY 1
+            NO MINVALUE
+            NO MAXVALUE
+            CACHE 1;
+
+            alter table rest_skeleton_sm.clients_id_seq OWNER TO ashlokov;
+
+            alter sequence rest_skeleton_sm.clients_id_seq OWNED BY rest_skeleton_sm.clients.id;
+
+            alter table ONLY rest_skeleton_sm.clients alter COLUMN id SET DEFAULT nextval('rest_skeleton_sm.clients_id_seq'::regclass);
+
+            COMMENT ON TABLE rest_skeleton_sm.clients IS 'Клиенты';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.id IS 'Уникальный идентификатор записи';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.email IS 'Почта клиент';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.name IS 'Имя клиента';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.phone IS 'Телефоннный номер клиента';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.car_id IS 'Идентификатор авто';
+            COMMENT ON COLUMN rest_skeleton_sm.clients.message_id IS 'Идентификатор сообщения';
+        </sql>
+        <rollback>
+            <dropTable tableName="clients" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="08" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="messages" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы сообщений</comment>
+        <sql>
+            create TABLE  IF NOT EXISTS  rest_skeleton_sm.messages (
+            id integer NOT NULL,
+            message TEXT,
+            PRIMARY KEY (id)
+            );
+
+            create sequence  IF NOT EXISTS rest_skeleton_sm.messages_id_seq
+            AS integer
+            START with 1
+            INCREMENT BY 1
+            NO MINVALUE
+            NO MAXVALUE
+            CACHE 1;
+
+            alter table rest_skeleton_sm.messages_id_seq OWNER TO ashlokov;
+
+            alter table ONLY rest_skeleton_sm.messages alter COLUMN id SET DEFAULT nextval('rest_skeleton_sm.messages_id_seq'::regclass);
+
+            COMMENT ON TABLE rest_skeleton_sm.messages IS 'Сообщения';
+            COMMENT ON COLUMN rest_skeleton_sm.messages.id IS 'Уникальный идентификатор записи';
+            COMMENT ON COLUMN rest_skeleton_sm.messages.message IS 'Текст сообщения';
+
+        </sql>
+        <rollback>
+            <dropTable tableName="messages" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="09" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="clients_messages" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы связи один ко многим</comment>
+        <sql>
+            create table if not exists rest_skeleton_sm.clients_messages(
+                client_id integer,
+                message_id integer
+            );
+            alter table rest_skeleton_sm.clients_messages OWNER TO ashlokov;
+        </sql>
+        <rollback>
+            <dropTable tableName="clients_messages" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="10" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="users" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы сообщений</comment>
+        <sql>
+            create table rest_skeleton_sm.users(
+                id serial primary key,
+                email varchar(255) constraint email_constraint unique,
+                password varchar(1000)
+            );
+
+            alter table rest_skeleton_sm.users owner to ashlokov;
+        </sql>
+        <rollback>
+            <dropTable tableName="users" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="11" author="ashlokov">
+        <preConditions>
+            <not>
+                <tableExists tableName="user_role" schemaName="rest_skeleton_sm"/>
+            </not>
+        </preConditions>
+        <comment>Создание таблицы Роли пользователей</comment>
+        <sql>
+            create table rest_skeleton_sm.user_role(
+                user_id integer not null
+                    constraint user_id_constraint references rest_skeleton_sm.users,
+                roles varchar(255)
+            );
+
+            alter table rest_skeleton_sm.user_role owner to ashlokov;
+        </sql>
+        <rollback>
+            <dropTable tableName="user_role" schemaName="rest_skeleton_sm"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="12" author="ashlokov">
+        <comment>Первичное наполнение </comment>
+        <sqlFile path="./data/populate.sql"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+

@@ -25,8 +25,7 @@ create TABLE  IF NOT EXISTS  public.clients (
     email character varying(255),
     name character varying(255),
     phone character varying(255),
-    car_id integer,
-    message_id integer
+    car_id integer
 );
 
 create TABLE  IF NOT EXISTS  public.messages (
